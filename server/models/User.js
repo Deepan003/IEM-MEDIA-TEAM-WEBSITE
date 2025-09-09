@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
-// This schema defines the structure for user data in the database.
 const UserSchema = new mongoose.Schema({
-    // --- Core Credentials ---
+    // --- Common Fields for All Users ---
     fullName: {
         type: String,
         required: [true, 'Please provide a full name'],
@@ -11,20 +10,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide an email'],
         unique: true,
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please provide a valid email'
-        ]
-    },
-    username: {
-        type: String,
-        required: [function() { return this.role === 'photographer'; }, 'Username is required for photographers'],
-        unique: true,
-        sparse: true, // Allows multiple null values, ensuring uniqueness only for photographers
+        match: [ /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email' ]
     },
     password: {
         type: String,
-        required: [function() { return this.role !== 'guest'; }, 'Password is required'],
+        required: [true, 'A password is required'], // Now required for everyone
         minlength: 6,
     },
     role: {
@@ -33,28 +23,40 @@ const UserSchema = new mongoose.Schema({
         required: true,
     },
 
-    // --- Photographer & Student Details ---
-    enrollmentNumber: { type: String },
-    rollNumber: { type: String },
+    // --- Photographer-Only Fields ---
+    username: {
+        type: String,
+        required: [function() { return this.role === 'photographer'; }, 'Username is required for photographers'],
+        unique: true,
+        sparse: true, // This ensures the 'unique' constraint only applies to documents that have this field.
+    },
+    
+    // --- Photographer-Specific Details ---
     year: { type: Number },
-    department: { type: String },
     device: { type: String, default: '' },
     lenses: { type: String, default: '' },
-    
-    // --- Contact & Personal Info ---
     phone: { type: String, default: '' },
     whatsapp: { type: String, default: '' },
     gender: { type: String, enum: ['Male', 'Female', 'Other', 'Prefer not to say'] },
     city: { type: String },
 
-    // --- Guest Specific ---
-    college: {
+    // --- Guest-Only Fields ---
+    designation: {
         type: String,
-        required: [function() { return this.role === 'guest'; }, 'College name is required for guests'],
-    }
+        enum: ['Student', 'Teacher'],
+        required: [function() { return this.role === 'guest'; }, 'Designation is required for guests'],
+    },
+    institution: {
+        type: String,
+        required: [function() { return this.role === 'guest' && this.designation === 'Student'; }, 'Institution is required for students'],
+    },
+    
+    // --- Fields for both Photographers and Guests ---
+    enrollmentNumber: { type: String }, // For Photographers and Guest Students
+    department: { type: String },       // For Photographers and Guest Teachers
+    rollNumber: { type: String },       // For Photographers (can be repurposed for Guests if needed)
 
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
+}, { timestamps: true });
 
-// Create the model from the schema and export it
 const User = mongoose.model('User', UserSchema);
 module.exports = User;
