@@ -93,6 +93,72 @@ exports.registerPhotographer = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+// --- ADD THIS NEW FUNCTION FOR GUESTS ---
+exports.registerGuest = async (req, res) => {
+    console.log('Received data for guest registration:', req.body);
+
+    const { email, password, otp, fullName, designation, institution, enrollmentNumber, department, otherInstitution } = req.body;
+    
+    if (!email || !password || !otp || !fullName || !designation) {
+        return res.status(400).json({ message: "Missing required fields." });
+    }
+
+    const storedOtpData = otpStore[email];
+    if (!storedOtpData) {
+        return res.status(400).json({ message: 'OTP not found. Please request one again.' });
+    }
+    if (Date.now() > storedOtpData.expiration) {
+        delete otpStore[email];
+        return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+    }
+    if (storedOtpData.otp !== otp) {
+        return res.status(400).json({ message: 'Invalid OTP.' });
+    }
+    
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ message: 'User with this email already exists.' });
+        }
+        
+        const guestDetails = {
+            email,
+            password,
+            fullName,
+            designation,
+            role: 'guest'
+        };
+
+        if (designation === 'Student') {
+            guestDetails.enrollmentNumber = enrollmentNumber;
+            guestDetails.institution = institution === 'Other' ? otherInstitution : institution;
+        } else if (designation === 'Teacher') {
+            guestDetails.department = department;
+        }
+
+        user = new User(guestDetails);
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        await user.save();
+        
+        delete otpStore[email];
+
+        const payload = { user: { id: user.id, role: user.role } };
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' },
+            (err, token) => {
+                if (err) throw err;
+                res.status(201).json({ token });
+            }
+        );
+    } catch (error) {
+        console.error('GUEST REGISTRATION ERROR:', error); 
+        res.status(500).send('Server Error');
+    }
+};
 
 exports.checkUsername = async (req, res) => {
     try {

@@ -6,15 +6,29 @@ export default {
   ],
   theme: {
     extend: {
-      // We are adding custom keyframes and animations here
+      // You can move the keyframes and animations here
+      // to make them available as utility classes.
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(-10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        'focus-pull': {
+          '0%, 10%, 90%, 100%': {
+            filter: 'blur(8px) brightness(0.7)',
+          },
+          '30%, 70%': {
+            filter: 'blur(0px) brightness(1)',
+          },
+        },
+        'shutter-flash': {
+          '0%': {
+            boxShadow: '0 0 0 0 rgba(255, 255, 255, 0.7)',
+          },
+          '100%': {
+            boxShadow: '0 0 0 20px rgba(255, 255, 255, 0)',
+          },
         },
       },
       animation: {
-        fadeIn: 'fadeIn 0.5s ease-out',
+        'focus-pull': 'focus-pull 10s ease-in-out infinite',
+        'shutter-flash': 'shutter-flash 0.3s ease-out',
       },
     },
   },

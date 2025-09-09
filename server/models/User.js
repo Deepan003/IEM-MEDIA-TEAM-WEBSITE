@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'A password is required'], // Now required for everyone
+        required: [true, 'A password is required'], // NOW REQUIRED FOR GUESTS TOO
         minlength: 6,
     },
     role: {
@@ -26,9 +26,10 @@ const UserSchema = new mongoose.Schema({
     // --- Photographer-Only Fields ---
     username: {
         type: String,
+        // Only required if the user is a photographer
         required: [function() { return this.role === 'photographer'; }, 'Username is required for photographers'],
         unique: true,
-        sparse: true, // This ensures the 'unique' constraint only applies to documents that have this field.
+        sparse: true, // This allows multiple users to have a null username (i.e., guests)
     },
     
     // --- Photographer-Specific Details ---
@@ -48,13 +49,14 @@ const UserSchema = new mongoose.Schema({
     },
     institution: {
         type: String,
+        // Only required if the user is a guest AND a student
         required: [function() { return this.role === 'guest' && this.designation === 'Student'; }, 'Institution is required for students'],
     },
     
-    // --- Fields for both Photographers and Guests ---
+    // --- Fields for both Photographers and certain Guests ---
     enrollmentNumber: { type: String }, // For Photographers and Guest Students
     department: { type: String },       // For Photographers and Guest Teachers
-    rollNumber: { type: String },       // For Photographers (can be repurposed for Guests if needed)
+    rollNumber: { type: String },       // For Photographers and Guest Students
 
 }, { timestamps: true });
 
