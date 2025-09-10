@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, banUser, deleteUser } = require('../controllers/userController');
+const { getUsers, banUser, deleteUser } = require('./userController');
 const auth = require('../middleware/auth'); // We'll create this middleware for authentication
 
 // Middleware to check for Admin/Lead roles

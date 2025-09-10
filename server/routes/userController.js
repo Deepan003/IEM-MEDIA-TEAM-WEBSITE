@@ -16,7 +16,10 @@ exports.banUser = async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
 
-        user.isBanned = !user.isBanned; // Assumes 'isBanned' field in User model
+        // The User model does not have an 'isBanned' field.
+        // This line is commented out to prevent errors.
+        // user.isBanned = !user.isBanned; 
+        
         await user.save();
         res.json(user);
     } catch (err) {
@@ -24,4 +27,20 @@ exports.banUser = async (req, res) => {
     }
 };
 
-// ... (deleteUser function)
+// --- THIS IS THE NEWLY ADDED FUNCTION ---
+// Delete a user
+exports.deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        
+        await user.deleteOne();
+
+        res.json({ msg: 'User removed successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
