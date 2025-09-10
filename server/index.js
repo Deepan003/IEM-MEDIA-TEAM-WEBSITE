@@ -32,6 +32,11 @@ app.use(express.json());
 // --- API ROUTES ---
 // This tells our app to use the auth router for any requests that start with '/api/auth'
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users')); // Add this
+app.use('/api/events', require('./routes/events')); // Add this
+// ... (add routes for announcements and social media)
+
 
 
 // A basic route to confirm the server is running
