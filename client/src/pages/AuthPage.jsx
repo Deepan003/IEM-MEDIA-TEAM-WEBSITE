@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Eye, EyeOff, UserPlus, LogIn, Camera, RefreshCw, CheckCircle, XCircle, Loader2, AlertTriangle, Info } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 // --- DIALOG BOX COMPONENT (Integrated) ---
 const DialogBox = ({ message, type, onClose }) => {
@@ -68,6 +69,7 @@ const generateUsername = (fullName) => {
 
 // --- MAIN PAGE COMPONENT ---
 const AuthPage = () => {
+    const { login } = useAuth(); // Get the login function from context
     const navigate = useNavigate();
     const [authMode, setAuthMode] = useState('login');
     const [formData, setFormData] = useState({ fullName: '', enrollmentNumber: '', email: '', rollNumber: '', year: '', department: 'B.Tech', otherDepartment: '', device: '', lenses: '', phone: '', whatsapp: '', gender: 'Prefer not to say', city: '', username: '', password: '', confirmPassword: '' });
@@ -180,12 +182,13 @@ const AuthPage = () => {
     }, [formData.username]);
 
     const handleGenerateUsername = () => setFormData(prev => ({ ...prev, username: generateUsername(prev.fullName) }));
+    
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         try {
             const response = await axios.post('/api/auth/login', loginData);
-            localStorage.setItem('token', response.data.token);
+            login(response.data.token); // Use the context login function
             navigate('/dashboard');
         } catch (error) {
             setDialog({ message: error.response?.data?.message || 'Login failed. Please check your credentials.', type: 'error' });
@@ -479,4 +482,3 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
-
