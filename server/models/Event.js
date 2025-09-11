@@ -45,6 +45,12 @@ const eventSchema = new mongoose.Schema({
             user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
             status: { type: String, enum: ['Present', 'Absent'], default: 'Absent' }
         }]
+    },
+    // This field is now added
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, { timestamps: true });
 

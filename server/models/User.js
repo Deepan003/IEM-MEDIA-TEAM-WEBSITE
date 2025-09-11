@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'A password is required'], // NOW REQUIRED FOR GUESTS TOO
+        required: [true, 'A password is required'],
         minlength: 6,
     },
     role: {
@@ -23,16 +23,21 @@ const UserSchema = new mongoose.Schema({
         required: true,
     },
 
+    // --- ADD THIS LINE ---
+    isBanned: {
+        type: Boolean,
+        default: false
+    },
+
     // --- Photographer-Only Fields ---
     username: {
         type: String,
-        // Only required if the user is a photographer
         required: [function() { return this.role === 'photographer'; }, 'Username is required for photographers'],
         unique: true,
-        sparse: true, // This allows multiple users to have a null username (i.e., guests)
+        sparse: true,
     },
     
-    // --- Photographer-Specific Details ---
+    // ... rest of the schema remains the same
     year: { type: Number },
     device: { type: String, default: '' },
     lenses: { type: String, default: '' },
@@ -40,8 +45,6 @@ const UserSchema = new mongoose.Schema({
     whatsapp: { type: String, default: '' },
     gender: { type: String, enum: ['Male', 'Female', 'Other', 'Prefer not to say'] },
     city: { type: String },
-
-    // --- Guest-Only Fields ---
     designation: {
         type: String,
         enum: ['Student', 'Teacher'],
@@ -49,15 +52,11 @@ const UserSchema = new mongoose.Schema({
     },
     institution: {
         type: String,
-        // Only required if the user is a guest AND a student
         required: [function() { return this.role === 'guest' && this.designation === 'Student'; }, 'Institution is required for students'],
     },
-    
-    // --- Fields for both Photographers and certain Guests ---
-    enrollmentNumber: { type: String }, // For Photographers and Guest Students
-    department: { type: String },       // For Photographers and Guest Teachers
-    rollNumber: { type: String },       // For Photographers and Guest Students
-
+    enrollmentNumber: { type: String },
+    department: { type: String },
+    rollNumber: { type: String },
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);

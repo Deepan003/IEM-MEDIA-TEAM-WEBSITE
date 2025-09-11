@@ -34,7 +34,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users')); // Add this
 app.use('/api/events', require('./routes/events')); // Add this
-// ... (add routes for announcements and social media)
+app.use('/api/announcements', require('./routes/announcements'));
 
 
 

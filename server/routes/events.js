@@ -1,9 +1,21 @@
 const express = require('express');
 const router = express.Router();
-// ... import event controller functions
+const { createEvent, getEvents } = require('../controllers/eventController');
 const auth = require('../middleware/auth');
 
-// ... (routes for creating, updating, deleting, and getting events)
-// ... (routes for managing participants, sub-events, attendance, etc.)
+// Middleware to ensure only leads or admins can create events
+const isLead = (req, res, next) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'lead') {
+        return res.status(403).json({ message: 'Access denied. Must be a Lead or Admin.' });
+    }
+    next();
+};
+
+// @route   POST /api/events
+router.post('/', [auth, isLead], createEvent);
+
+// @route   GET /api/events
+router.get('/', auth, getEvents);
+
 
 module.exports = router;
